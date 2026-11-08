@@ -1,0 +1,8 @@
+{
+  "name": "cotenancy-guard",
+  "version": "0.1.0",
+  "description": "Keeps a liveness marker per Claude Code session so a git pre-commit hook can refuse whole-index commits while another session shares the working tree.",
+  "author": { "name": "Conrado Rebuffo" },
+  "license": "MIT",
+  "homepage": "https://github.com/conradorebuffo/cotenancy-guard"
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Run a Python script with python3 if it works, else python. On Windows "python3" can be
+# the Microsoft Store stub, which exists but does not run, so test it instead of trusting PATH.
+if python3 -c "" >/dev/null 2>&1; then exec python3 "$@"; fi
+exec python "$@"

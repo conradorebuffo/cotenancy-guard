@@ -1,0 +1,11 @@
+{
+  "name": "cotenancy-guard",
+  "owner": { "name": "Conrado Rebuffo" },
+  "plugins": [
+    {
+      "name": "cotenancy-guard",
+      "source": "./",
+      "description": "Session markers for the cotenancy-guard git pre-commit hook."
+    }
+  ]
+}
