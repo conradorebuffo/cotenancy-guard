@@ -21,8 +21,8 @@ MARKER_SUBDIR = "cotenancy"
 _SAFE_ID = re.compile(r"[^A-Za-z0-9._-]")
 
 
-def ttl_seconds() -> int:
-    raw = os.environ.get("COTENANCY_TTL_SECONDS", "")
+def ttl_seconds(env: dict | None = None) -> int:
+    raw = (os.environ if env is None else env).get("COTENANCY_TTL_SECONDS", "")
     try:
         value = int(raw)
     except ValueError:

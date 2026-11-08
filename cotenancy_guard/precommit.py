@@ -66,7 +66,7 @@ def evaluate(cwd: str, env: dict) -> tuple[list[str], list[str]]:
     scoped = is_scoped(env.get("GIT_INDEX_FILE"))
     if scoped is False:
         me = env.get("COTENANCY_SESSION_ID", "")
-        live, problems = markers.live_sessions(marker_dir, toplevel)
+        live, problems = markers.live_sessions(marker_dir, toplevel, ttl=markers.ttl_seconds(env))
         warnings.extend(problems)
         others = [m for m in live if m["session_id"] != me]
         if others:

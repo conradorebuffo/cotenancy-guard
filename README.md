@@ -34,10 +34,10 @@ The hook works on its own; the plugin is what lets it tell sessions apart.
 
 ```sh
 git clone https://github.com/conradorebuffo/cotenancy-guard
-python cotenancy-guard/cotenancy_guard/install.py --repo /path/to/your/repo
+python3 cotenancy-guard/cotenancy_guard/install.py --repo /path/to/your/repo   # "python" on Windows
 ```
 
-This writes `pre-commit` into the repo's hooks directory (it respects `core.hooksPath`) and refuses to replace an existing hook unless you pass `--force`. If you already have a pre-commit hook, call `cotenancy_guard/precommit.py` from it instead.
+This writes `pre-commit` into the repo's hooks directory and refuses to replace an existing hook unless you pass `--force`. It respects `core.hooksPath`: if you set that globally, the hook lands in your global hooks directory and applies to every repo. The installed hook calls `precommit.py` by absolute path inside the clone, so keep the clone where it is; if the file or Python is missing, the hook prints a warning and lets the commit through. If you already have a pre-commit hook, call `cotenancy_guard/precommit.py` from it instead.
 
 Then, in Claude Code:
 
@@ -62,10 +62,10 @@ When it refuses a commit, the message says which sessions are live and what to r
 ## Limits
 
 - `next-index-<pid>.lock` is an implementation detail of git, not a documented interface. If a future git renames it, every commit made while another session is live gets refused. The hook fails closed in that case, so you would notice; `COTENANCY_GUARD_MODE=warn` is the way out until it's updated.
-- It covers the index that is ahead (one session commits what another staged). The issue describes two more routes that this does not touch: merges done through plumbing (`merge-tree`, `commit-tree`, `update-ref`), and an orphaned `index.lock`.
+- The session check covers the index that is ahead (one session commits what another staged). The issue describes two more routes: merges done through plumbing (`merge-tree`, `commit-tree`, `update-ref`) and an orphaned `index.lock`. The staged-deletion check catches their usual signature, files deleted in the index but still on disk; as the issue notes, it stays silent when a plumbing merge leaves the files off disk, because then index and disk agree.
 - A marker records that a session is alive, not which files it owns. The hook can tell you another session is there; it can't tell whether that session has anything staged. In a repo with two live sessions, every whole-index commit is refused, even when the other session is idle.
 - Without the plugin, or from a terminal outside Claude Code, `COTENANCY_SESSION_ID` is unset and any live marker counts as another session. That is deliberate (a human committing next to a live agent is the same risk), but it means a session whose environment did not pick up `CLAUDE_ENV_FILE` will see its own marker as someone else's.
-- Liveness is a TTL, not a heartbeat from a running process. A session that crashes keeps counting as live until its marker expires.
+- Liveness is a TTL, not a heartbeat from a running process, and that cuts both ways. A session that crashes keeps counting as live until its marker expires. A session that sits idle longer than the TTL (the marker is refreshed only when a turn ends) stops counting, even if it still has files staged; raise `COTENANCY_TTL_SECONDS` if your sessions idle for hours.
 - Separate worktrees per session remain the strong fix. This is for setups where several sessions share one tree on purpose.
 - Internal errors (git missing, unreadable repo) let the commit through with a warning on stderr. A broken guard should not stop work.
 

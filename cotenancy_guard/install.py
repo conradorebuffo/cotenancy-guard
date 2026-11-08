@@ -20,7 +20,16 @@ PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 HOOK_TEMPLATE = """#!/bin/sh
 # cotenancy-guard pre-commit (https://github.com/conradorebuffo/cotenancy-guard)
 GUARD="{script}"
-if python3 -c "" >/dev/null 2>&1; then PY=python3; else PY=python; fi
+if [ ! -f "$GUARD" ]; then
+  echo "cotenancy-guard: $GUARD not found (clone moved or deleted?); commit allowed. Reinstall the hook." >&2
+  exit 0
+fi
+if python3 -c "" >/dev/null 2>&1; then PY=python3
+elif python -c "" >/dev/null 2>&1; then PY=python
+else
+  echo "cotenancy-guard: no working python3/python on PATH; commit allowed." >&2
+  exit 0
+fi
 exec "$PY" "$GUARD"
 """
 

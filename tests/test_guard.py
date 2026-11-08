@@ -269,3 +269,23 @@ def test_plugin_manifests_are_valid_json():
         json.load(open(os.path.join(ROOT, rel), encoding="utf-8"))
     hooks = json.load(open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8"))["hooks"]
     assert set(hooks) == {"SessionStart", "Stop", "SessionEnd"}
+
+
+def test_installed_hook_fails_open_when_guard_file_is_missing(repo):
+    hook = os.path.join(repo, ".git", "hooks", "pre-commit")
+    text = open(hook, encoding="utf-8").read().replace("precommit.py", "missing_precommit.py")
+    open(hook, "w", encoding="utf-8", newline="\n").write(text)
+    live(repo, "A", "B")
+    write(repo, "b.txt", "x\n")
+    git(repo, "add", "b.txt")
+    r = git(repo, "commit", "-q", "-m", "m", env={"COTENANCY_SESSION_ID": "B"}, check=False)
+    assert r.returncode == 0 and "not found" in r.stderr
+
+
+def test_ttl_comes_from_the_env_passed_in(repo):
+    live(repo, "A", age=120)                       # A refreshed two minutes ago
+    write(repo, "b.txt", "x\n")
+    git(repo, "add", "b.txt")
+    base = {"GIT_INDEX_FILE": ".git/index", "COTENANCY_SESSION_ID": "B"}
+    assert precommit.evaluate(repo, {**base, "COTENANCY_TTL_SECONDS": "60"})[0] == []
+    assert precommit.evaluate(repo, {**base, "COTENANCY_TTL_SECONDS": "3600"})[0] != []
