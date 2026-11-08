@@ -76,11 +76,42 @@ def write_marker(marker_dir: str, session_id: str, toplevel: str, now: float | N
 
 
 def remove_marker(marker_dir: str, session_id: str) -> bool:
+    removed = False
+    for path in (marker_file(marker_dir, session_id), paths_file(marker_dir, session_id)):
+        try:
+            os.remove(path)
+            removed = True
+        except FileNotFoundError:
+            pass
+    return removed
+
+
+def paths_file(marker_dir: str, session_id: str) -> str:
+    """Where a session's touched paths are recorded (one repo-relative path per line)."""
+    return marker_file(marker_dir, session_id)[: -len(".json")] + ".paths"
+
+
+def add_touched(marker_dir: str, session_id: str, rel_paths: list[str]) -> None:
+    """Record paths this session edited. Append-only: one write per call, so parallel
+    tool calls of the same session cannot lose each other's entries."""
+    lines = "".join(p.replace("\\", "/") + "\n" for p in rel_paths if p and "\n" not in p)
+    if not lines:
+        return
+    os.makedirs(marker_dir, exist_ok=True)
+    fd = os.open(paths_file(marker_dir, session_id), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
     try:
-        os.remove(marker_file(marker_dir, session_id))
-        return True
+        os.write(fd, lines.encode("utf-8"))
+    finally:
+        os.close(fd)
+
+
+def touched_paths(marker_dir: str, session_id: str) -> set[str] | None:
+    """Repo-relative paths this session edited, or None when it has no record at all."""
+    try:
+        with open(paths_file(marker_dir, session_id), encoding="utf-8") as fh:
+            return {ln.strip() for ln in fh if ln.strip()}
     except FileNotFoundError:
-        return False
+        return None
 
 
 def live_sessions(marker_dir: str, toplevel: str, now: float | None = None,

@@ -95,14 +95,16 @@ def test_marker_refresh_keeps_created_at(tmp_path):
     d = str(tmp_path / "m")
     path = markers.write_marker(d, "s1", "/top", now=100.0)
     markers.write_marker(d, "s1", "/top", now=200.0)
-    data = json.load(open(path, encoding="utf-8"))
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
     assert data["created_at"] == 100.0 and data["updated_at"] == 200.0
 
 
 def test_unreadable_marker_is_reported(tmp_path):
     d = str(tmp_path / "m")
     os.makedirs(d)
-    open(os.path.join(d, "bad.json"), "w").write("{not json")
+    with open(os.path.join(d, "bad.json"), "w") as fh:
+        fh.write("{not json")
     found, problems = markers.live_sessions(d, "/top")
     assert found == [] and problems and "bad.json" in problems[0]
 
@@ -268,7 +270,7 @@ def test_plugin_manifests_are_valid_json():
     for rel in (".claude-plugin/plugin.json", ".claude-plugin/marketplace.json", "hooks/hooks.json"):
         json.load(open(os.path.join(ROOT, rel), encoding="utf-8"))
     hooks = json.load(open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8"))["hooks"]
-    assert set(hooks) == {"SessionStart", "Stop", "SessionEnd"}
+    assert set(hooks) == {"SessionStart", "Stop", "SessionEnd", "PostToolUse", "PreToolUse"}
 
 
 def test_installed_hook_fails_open_when_guard_file_is_missing(repo):
