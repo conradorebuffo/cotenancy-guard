@@ -5,6 +5,7 @@ permissions:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python: ["3.9", "3.13"]
@@ -14,5 +15,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install pytest
-      - run: python -m pytest -q
+      - run: git --version && python --version && python -m pip install pytest
+        shell: bash
+      # On failure, the tail of the pytest output also goes out as an error annotation, so it
+      # can be read from the API without downloading the job log.
+      - run: |
+          set -o pipefail
+          python -m pytest -q -rf --tb=short 2>&1 | tee pytest.out || {
+            echo "::error title=pytest::$(tail -n 60 pytest.out | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')"
+            exit 1
+          }
+        shell: bash
