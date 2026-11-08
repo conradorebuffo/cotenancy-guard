@@ -26,7 +26,7 @@ The hook combines that with a liveness marker per session:
 - `Stop` refreshes the marker after every turn, and `SessionEnd` removes it. A marker older than the TTL (2 hours by default) no longer counts, which covers sessions that died without a `SessionEnd`.
 - pre-commit refuses a whole-index commit only when another live session shares the same working tree. Sessions in separate worktrees of the same repo don't count. A commit with a pathspec always passes.
 
-It also checks one more thing, an idea from @capraCoder in the issue thread: a commit whose index deletes files that are still on disk is refused. That is what a stale index looks like after another session committed new files.
+It also checks one more thing, the five-line guard @capraCoder proposed in the issue: a commit whose index deletes files that are still on disk is refused. That is what a stale index looks like after another session committed new files.
 
 ## Install
 
@@ -75,7 +75,7 @@ When it refuses a commit, the message says which sessions are live and what to r
 python -m pytest -q
 ```
 
-The integration tests run real `git commit` calls in temporary repositories with the hook installed. CI runs them on Ubuntu and Windows.
+The integration tests run real `git commit` calls in temporary repositories with the hook installed. The CI workflow runs them on Ubuntu and Windows with Python 3.9 and 3.13.
 
 ## License
 
