@@ -92,6 +92,18 @@ When it refuses a commit, the message says which sessions are live and what to r
 - Separate worktrees per session remain the strong fix. This is for setups where several sessions share one tree on purpose.
 - Internal errors (git missing, unreadable repo) let the commit through with a warning on stderr. A broken guard should not stop work.
 
+## Privacy
+
+cotenancy-guard makes no network calls and sends nothing anywhere. Everything it writes stays in
+your repository's git directory, under `.git/cotenancy/`:
+
+- `<session_id>.json`: the session id, the working tree path and two timestamps.
+- `<session_id>.paths`: the repository-relative paths of the files the session edited.
+
+Both are deleted when the session ends; a marker left by a session that crashed stops counting
+after the TTL (2 hours by default) and can be deleted by hand. It reads no personal data,
+credentials or file contents.
+
 ## Tests
 
 ```sh
