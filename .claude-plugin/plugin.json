@@ -1,8 +1,10 @@
 {
   "name": "cotenancy-guard",
-  "version": "0.1.0",
-  "description": "Keeps a liveness marker per Claude Code session so a git pre-commit hook can refuse whole-index commits while another session shares the working tree.",
-  "author": { "name": "Conrado Rebuffo" },
+  "version": "0.2.0",
+  "description": "Keeps parallel Claude Code sessions in one git working tree from committing each other's staged work: a whole-index git commit is rewritten to the session's own paths, or refused when that can't be done safely.",
+  "author": {
+    "name": "Conrado Rebuffo"
+  },
   "license": "MIT",
   "homepage": "https://github.com/conradorebuffo/cotenancy-guard"
 }

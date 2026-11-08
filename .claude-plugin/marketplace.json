@@ -1,11 +1,14 @@
 {
   "name": "cotenancy-guard",
-  "owner": { "name": "Conrado Rebuffo" },
+  "owner": {
+    "name": "Conrado Rebuffo"
+  },
   "plugins": [
     {
       "name": "cotenancy-guard",
       "source": "./",
-      "description": "Session markers for the cotenancy-guard git pre-commit hook."
+      "description": "Keeps parallel Claude Code sessions in one git working tree from committing each other's staged work: a whole-index git commit is rewritten to the session's own paths, or refused when that can't be done safely."
     }
-  ]
+  ],
+  "description": "Marketplace for cotenancy-guard."
 }
