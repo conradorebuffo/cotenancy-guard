@@ -75,7 +75,7 @@ When it refuses a commit, the message says which sessions are live and what to r
 python -m pytest -q
 ```
 
-The integration tests run real `git commit` calls in temporary repositories with the hook installed. The CI workflow runs them on Ubuntu and Windows with Python 3.9 and 3.13.
+The integration tests run real `git commit` calls in temporary repositories with the hook installed. The CI workflow runs them on Windows with Python 3.9 and 3.13, and on Ubuntu with Python 3.10 and 3.13.
 
 ## License
 

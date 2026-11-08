@@ -45,7 +45,9 @@ def is_scoped(index_file: str | None) -> bool | None:
     """
     if not index_file:
         return None
-    return fnmatch.fnmatch(os.path.basename(index_file).lower(), "next-index-*.lock")
+    # Split on both separators: os.path.basename on POSIX leaves a Windows path whole.
+    name = index_file.replace("\\", "/").rsplit("/", 1)[-1]
+    return fnmatch.fnmatch(name.lower(), "next-index-*.lock")
 
 
 def staged_deletions_on_disk(toplevel: str) -> list[str]:
